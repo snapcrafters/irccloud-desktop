@@ -3,7 +3,7 @@ version: 0.3.0
 summary: IRCCloud Desktop App
 description: |
   IRCCloud Desktop App
-icon: irccloud.png
+icon: irccloud-desktop.png
 
 grade: stable
 confinement: strict
