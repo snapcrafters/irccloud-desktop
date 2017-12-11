@@ -1,5 +1,5 @@
 name: irccloud-desktop
-version: 0.3.0
+version: 0.5.1
 summary: IRCCloud Desktop App
 description: |
   IRCCloud Desktop App
@@ -11,17 +11,18 @@ confinement: strict
 parts:
   irccloud-desktop:
     plugin: dump
-    source: https://github.com/irccloud/irccloud-desktop/releases/download/v0.3.0/irccloud-desktop-0.3.0-amd64.deb
+    source: https://github.com/irccloud/irccloud-desktop/releases/download/v0.5.1/irccloud-desktop_0.5.1_amd64.deb
     source-type: deb
     prepare: |
-      sed -i 's@Icon=irccloud-desktop@Icon=${SNAP}/usr/share/icons/hicolor/512x512/apps/irccloud-desktop.png@' usr/share/applications/IRCCloud.desktop
+      sed -i 's@Icon=irccloud-desktop@Icon=${SNAP}/usr/share/icons/hicolor/512x512/apps/irccloud-desktop.png@' usr/share/applications/irccloud-desktop.desktop
+      execstack --clear-execstack opt/IRCCloud/irccloud-desktop
+    build-packages:
+      - execstack
     after:
       - desktop-gtk2
     stage-packages:
-      - gconf2
       - libasound2
-      - libgl1-mesa-glx
-      - libglu1-mesa
+      - libgconf2-4
       - libnotify4
       - libnspr4
       - libnss3
@@ -31,18 +32,21 @@ parts:
 
 apps:
   irccloud-desktop:
-    # Correct the TMPDIR path for Chromium Framework/Electron to
-    # ensure libappindicator has readable resources.
-    command: env TMPDIR=$XDG_RUNTIME_DIR PATH=/usr/local/bin:${PATH} ${SNAP}/bin/desktop-launch $SNAP/opt/IRCCloud/IRCCloud
-    desktop: usr/share/applications/IRCCloud.desktop
+    command: bin/desktop-launch $SNAP/opt/IRCCloud/irccloud-desktop
+    desktop: usr/share/applications/irccloud-desktop.desktop
+    # Correct the TMPDIR path for Chromium Framework/Electron to ensure
+    # libappindicator has readable resources.
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR
     plugs:
       - browser-support
+      - desktop
+      - desktop-legacy
       - gsettings
       - home
       - mount-observe
       - network
       - network-bind
-      - opengl
       - pulseaudio
       - unity7
-      - x11
+      - wayland
