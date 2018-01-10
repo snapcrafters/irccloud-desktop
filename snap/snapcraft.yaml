@@ -50,3 +50,4 @@ apps:
       - pulseaudio
       - unity7
       - wayland
+      - x11
