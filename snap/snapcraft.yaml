@@ -1,5 +1,5 @@
 name: irccloud-desktop
-version: 0.5.1
+version: '0.6.0'
 summary: IRCCloud Desktop App
 description: |
   IRCCloud Desktop App
@@ -11,7 +11,7 @@ confinement: strict
 parts:
   irccloud-desktop:
     plugin: dump
-    source: https://github.com/irccloud/irccloud-desktop/releases/download/v0.5.1/irccloud-desktop_0.5.1_amd64.deb
+    source: https://github.com/irccloud/irccloud-desktop/releases/download/v$SNAPCRAFT_PROJECT_VERSION/irccloud-desktop_$SNAPCRAFT_PROJECT_VERSION_amd64.deb
     source-type: deb
     prepare: |
       sed -i 's@Icon=irccloud-desktop@Icon=${SNAP}/usr/share/icons/hicolor/512x512/apps/irccloud-desktop.png@' usr/share/applications/irccloud-desktop.desktop
@@ -19,35 +19,40 @@ parts:
     build-packages:
       - execstack
     after:
-      - desktop-gtk2
+    - alsa
+    - desktop-gtk2
     stage-packages:
-      - libasound2
-      - libgconf2-4
-      - libnotify4
-      - libnspr4
-      - libnss3
-      - libpulse0
-      - libxss1
-      - libxtst6
+    - gconf2
+    - libgl1-mesa-glx
+    - libglu1-mesa
+    - libnotify4
+    - libnspr4
+    - libnss3
+    - libpulse0
+    - libxss1
+    - libxtst6
+  
+  alsa:
+    after: [alsa-lib, alsa-plugins]
+  alsa-plugins:
+    after: [alsa-lib]
 
 apps:
   irccloud-desktop:
-    command: bin/desktop-launch $SNAP/opt/IRCCloud/irccloud-desktop
-    desktop: usr/share/applications/irccloud-desktop.desktop
-    # Correct the TMPDIR path for Chromium Framework/Electron to ensure
-    # libappindicator has readable resources.
+    command: desktop-launch alsa-launch $SNAP/opt/IRCCloud/irccloud-desktop
+    # Correct the TMPDIR path for Chromium Framework/Electron to
+    # ensure libappindicator has readable resources.
     environment:
       TMPDIR: $XDG_RUNTIME_DIR
+    desktop: usr/share/applications/irccloud-desktop.desktop
     plugs:
-      - browser-support
-      - desktop
-      - desktop-legacy
-      - gsettings
-      - home
-      - mount-observe
-      - network
-      - network-bind
-      - pulseaudio
-      - unity7
-      - wayland
-      - x11
+    - browser-support
+    - gsettings
+    - home
+    - mount-observe
+    - network
+    - network-bind
+    - opengl
+    - pulseaudio
+    - unity7
+    - x11
