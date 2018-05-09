@@ -67,8 +67,13 @@ apps:
     desktop: usr/share/applications/irccloud-desktop.desktop
     # Correct the TMPDIR path for Chromium Framework/Electron to
     # ensure libappindicator has readable resources.
+    # Coerce XDG_CURRENT_DESKTOP to Unity so that App Indicators
+    # are used and do not fall back to Notification Area applets
+    # or disappear completely.
     environment:
       TMPDIR: $XDG_RUNTIME_DIR
+      XDG_CURRENT_DESKTOP: Unity
+
     plugs:
       - browser-support
       - desktop
