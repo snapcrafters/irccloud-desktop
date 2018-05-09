@@ -1,5 +1,6 @@
 name: irccloud-desktop
-version: '0.6.0'
+version: latest
+version-script: cat $SNAPCRAFT_STAGE/version
 summary: IRCCloud Desktop App
 description: |
   IRCCloud Desktop App
@@ -10,33 +11,46 @@ confinement: strict
 
 parts:
   irccloud-desktop:
-    plugin: dump
-    source: https://github.com/irccloud/irccloud-desktop/releases/download/v$SNAPCRAFT_PROJECT_VERSION/irccloud-desktop_$SNAPCRAFT_PROJECT_VERSION_amd64.deb
-    source-type: deb
-    prepare: |
-      sed -i 's@Icon=irccloud-desktop@Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png@' usr/share/applications/irccloud-desktop.desktop
-      execstack --clear-execstack opt/IRCCloud/irccloud-desktop
+    plugin: nil
+    override-build: |
+      snapcraftctl build
+
+      # Get the latest releases json
+      echo "Get GitHub releases..."
+      wget --quiet https://api.github.com/repos/irccloud/irccloud-desktop/releases -O releases.json
+      # Get the version from the tag_name and the download URL.
+      VERSION=$(jq . releases.json | grep tag_name | cut -d'"' -f4 | sed s'/v//' | head -n 1)
+      DEB_URL=$(grep browser_download releases.json | grep "${VERSION}" | grep deb | cut -d'"' -f4)
+      DEB=$(basename "${DEB_URL}")
+      echo "Downloading ${DEB_URL}..."
+      wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+      echo "Unpacking ${DEB}..."
+      dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
+      rm -f releases.json 2>/dev/null
+      rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}" 2>/dev/null
+      echo $VERSION > $SNAPCRAFT_STAGE/version
+
+      # Correct the Icon path
+      sed -i 's|Icon=irccloud-desktop|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png|' ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/irccloud-desktop.desktop
     build-packages:
-    - execstack
+      - on amd64:
+        - jq
+        - wget
+      - else fail
     after:
-    - alsa
-    - desktop-gtk2
-    - icon
+      - desktop-gtk2
+      - icon
     stage-packages:
-    - gconf2
-    - libgl1-mesa-glx
-    - libglu1-mesa
-    - libnotify4
-    - libnspr4
-    - libnss3
-    - libpulse0
-    - libxss1
-    - libxtst6
-  
-  alsa:
-    after: [alsa-lib, alsa-plugins]
-  alsa-plugins:
-    after: [alsa-lib]
+      - libasound2
+      - libgl1-mesa-glx
+      - libglu1-mesa
+      - libgconf2-4
+      - libnotify4
+      - libnspr4
+      - libnss3
+      - libpulse0
+      - libxss1
+      - libxtst6
 
   icon:
     source: assets
@@ -44,24 +58,26 @@ parts:
     organize:
       irccloud-desktop.png: usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png
     stage:
-    - usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png
+      - usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png
 
 apps:
   irccloud-desktop:
-    command: desktop-launch alsa-launch $SNAP/opt/IRCCloud/irccloud-desktop
+    command: desktop-launch $SNAP/opt/IRCCloud/irccloud-desktop
+    desktop: usr/share/applications/irccloud-desktop.desktop
     # Correct the TMPDIR path for Chromium Framework/Electron to
     # ensure libappindicator has readable resources.
     environment:
       TMPDIR: $XDG_RUNTIME_DIR
-    desktop: usr/share/applications/irccloud-desktop.desktop
     plugs:
-    - browser-support
-    - gsettings
-    - home
-    - mount-observe
-    - network
-    - network-bind
-    - opengl
-    - pulseaudio
-    - unity7
-    - x11
+      - browser-support
+      - desktop
+      - desktop-legacy
+      - gsettings
+      - home
+      - mount-observe
+      - network
+      - network-bind
+      - opengl
+      - pulseaudio
+      - unity7
+      - x11
