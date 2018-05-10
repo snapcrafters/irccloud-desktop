@@ -33,6 +33,7 @@ parts:
       # Correct the Icon path
       sed -i 's|Icon=irccloud-desktop|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/irccloud-desktop.real.png|' ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/irccloud-desktop.desktop
     build-packages:
+      # IRCCloud only published debs for amd64 so fail builds on other architectures.
       - on amd64:
         - dpkg
         - jq
