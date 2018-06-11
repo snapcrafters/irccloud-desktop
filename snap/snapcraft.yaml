@@ -40,7 +40,7 @@ parts:
         - wget
       - else fail
     after:
-      - desktop-gtk2
+      - desktop-gtk3
       - icon
     stage-packages:
       - libasound2
