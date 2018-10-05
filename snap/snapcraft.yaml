@@ -15,9 +15,8 @@ architectures:
 parts:
   irccloud-desktop:
     plugin: nil
-    override-build: |
-      snapcraftctl build
-
+    override-pull: |
+      snapcraftctl pull
       # Get the latest releases json
       echo "Get GitHub releases..."
       wget --quiet https://api.github.com/repos/irccloud/irccloud-desktop/releases -O releases.json
