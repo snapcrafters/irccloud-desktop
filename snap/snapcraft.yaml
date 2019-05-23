@@ -6,15 +6,16 @@ adopt-info: irccloud-desktop
 
 grade: stable
 confinement: strict
+base: core18
 
 architectures:
   - build-on: amd64
 
 plugs:
-  gnome-3-26-1604:
+  gnome-3-28-1804:
     interface: content
     target: $SNAP/gnome-platform
-    default-provider: gnome-3-26-1604
+    default-provider: gnome-3-28-1804
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -29,28 +30,23 @@ plugs:
     default-provider: gtk-common-themes
 
 parts:
-  gnome:
-    plugin: nil
+  desktop-gnome-platform:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: gtk
+    plugin: make
+    make-parameters: ["FLAVOR=gtk3"]
     build-packages:
-      - software-properties-common
-    override-pull: |
-      add-apt-repository -y ppa:ubuntu-desktop/gnome-3-26
-      apt -y update
-      apt -y upgrade
-
+      - libgtk-3-dev
   libappindicator:
-    plugin: nil
     after:
-      - gnome
+      - desktop-gnome-platform
+    plugin: nil
     stage-packages:
       - libappindicator3-1
-    build-attributes:
-      - no-system-libraries
     prime:
       - usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdbusmenu*.so*
       - usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libappindicator*.so*
       - usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libindicator*.so*
-
   irccloud-desktop:
     plugin: nil
     override-build: |
@@ -79,11 +75,8 @@ parts:
     prime:
       - -opt/IRCCloud/chrome-sandbox
     after:
-      - gnome
       - desktop-gnome-platform
       - libappindicator
-    build-attributes:
-      - no-system-libraries
     stage-packages:
       - libasound2
       - libgconf2-4
