@@ -83,10 +83,17 @@ parts:
       - libnspr4
       - libnss3
       - libxss1
+      - yad
+
+  wrapper:
+    after:
+      - irccloud-desktop
+    plugin: dump
+    source: files/
 
 apps:
   irccloud-desktop:
-    command: desktop-launch $SNAP/opt/IRCCloud/irccloud --no-sandbox
+    command: desktop-launch $SNAP/bin/wrapper $SNAP/opt/IRCCloud/irccloud --no-sandbox
     desktop: usr/share/applications/irccloud.desktop
     environment:
       # Correct the TMPDIR path for Chromium Framework/Electron to
