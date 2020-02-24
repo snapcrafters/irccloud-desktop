@@ -1,0 +1,23 @@
+#!/bin/bash
+
+MIGRATION_TITLE="Migrate to the IRCCloud snap"
+MIGRATION_TEXT="This snap was maintained by the Snapcrafters community, <i>but will not be getting any further updates</i>.\
+\\n\\n\
+<b>IRCCloud is now publishing an official snap of IRCCloud</b>, you should migrate to the IRCCloud snap using these commands:\
+\\n\\n\
+<tt>snap remove irccloud-desktop</tt>\\n\
+<tt>snap install irccloud</tt>\
+\\n\\n\
+You will need to sign in to IRCCloud on first launch again. Read more about the official IRCCloud snap on its store page: \
+\\n\\n\
+https://snapcraft.io/irccloud"
+
+# Display migration alert
+$SNAP/usr/bin/yad \
+  --title="${MIGRATION_TITLE}" \
+  --text="${MIGRATION_TEXT}" \
+  --center \
+  --on-top \
+  --fixed
+
+exec "$@"
